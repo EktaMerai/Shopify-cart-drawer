@@ -1,0 +1,216 @@
+<section class="drawer" id="drawer-name" data-drawer-target>
+  <div class="drawer__overlay" data-drawer-close tabindex="-1"></div>
+  <div class="drawer__wrapper cart-modal">
+     <div class="modal-dialog">
+            <div class="modal-content">
+             <div class="dialogheader">
+                 <h5 class="modal-title font-medium">Hurry Up!!! Check out <br class="br-space" /> to avoid losing your order</h5>
+                 <div class="cart-items text-center">
+                  <h4>YOUR CART: <span id="cart_item_count"># Items</span></h4>
+                    <!--<button class="drawer__close" data-drawer-close aria-label="Close Drawer"></button>-->
+                 </div>
+              </div>
+            <div class="drawer__content cart-items-li" id="cart__drawer">
+              <div class="loader"><img src="https://cdn.shopify.com/s/files/1/0553/0075/1405/files/Spin-2s-55px.gif?v=1649850963" id="loader" style="display:none"/></div>
+              <div id="cart__drawer_items">
+              </div>
+              <div id="cart__drawer_items_append"></div>
+            </div>
+            <div class="modal-footer">
+                 <div class="f-dialog">
+                   <div class="total-con">
+                     <span>TOTAL</span>
+                      <span id="cart__total_price"></span>
+                   </div>
+                   <div class="informative-card">
+                     <img src="https://cdn.shopify.com/s/files/1/0553/0075/1405/files/info-icon.svg?v=1649678875" class="img-fluid" />
+                     <p>
+                       <b class="font-semibold">Discounts,</b> if applicable, <br class="br-space" /> will be added at the check out level
+                     </p>
+                   </div>
+                   <a id="cart__checkout_btn" id="drawer_checkout_btn" href="/checkout" class="btn btn--has-icon-after cart__continue-btn checkout">PROCEED TO CHECK OUT</a>
+                   <p class="checkout-text">
+                     <img src="https://cdn.shopify.com/s/files/1/0553/0075/1405/files/right.svg?v=1649678902" class="img-fluid" />Check out now and claim FREE SHIPPING!
+                   </p>
+                   <a href="/products/geo-large" class="modal-link">
+                     <img src="https://cdn.shopify.com/s/files/1/0553/0075/1405/files/left-arrow.svg?v=1649678930" class="img-fluid" /> CONTINUE SHOPPING
+                   </a>
+                 </div>
+              </div>
+              </div>
+       </div>
+  </div>
+</section>
+
+
+<script type="text/javascript">
+  
+
+{% assign amount_format = '{{amount}}' %}
+Shopify.money_format = "${{amount_format}}";
+Shopify.formatMoney = function(cents, format) {
+  if (typeof cents == 'string') { cents = cents.replace('.',''); }
+  var value = '';
+  var placeholderRegex = /\{\{\s*(\w+)\s*\}\}/;
+  var formatString = (format || this.money_format);
+
+  function defaultOption(opt, def) {
+     return (typeof opt == 'undefined' ? def : opt);
+  }
+
+  function formatWithDelimiters(number, precision, thousands, decimal) {
+    precision = defaultOption(precision, 2);
+    thousands = defaultOption(thousands, ',');
+    decimal   = defaultOption(decimal, '.');
+
+    if (isNaN(number) || number == null) { return 0; }
+
+    number = (number/100.0).toFixed(precision);
+
+    var parts   = number.split('.'),
+        dollars = parts[0].replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1' + thousands),
+        cents   = parts[1] ? (decimal + parts[1]) : '';
+
+    return dollars + cents;
+  }
+
+  switch(formatString.match(placeholderRegex)[1]) {
+    case 'amount':
+      value = formatWithDelimiters(cents, 2);
+      break;
+    case 'amount_no_decimals':
+      value = formatWithDelimiters(cents, 0);
+      break;
+    case 'amount_with_comma_separator':
+      value = formatWithDelimiters(cents, 2, '.', ',');
+      break;
+    case 'amount_no_decimals_with_comma_separator':
+      value = formatWithDelimiters(cents, 0, '.', ',');
+      break;
+  }
+
+  return formatString.replace(placeholderRegex, value);
+};
+  
+fetch('/cart.json')
+  .then((resp) => resp.json())
+  .then((data) => {
+    if(data.items.length > 0) {
+        data.items.forEach(function(product, index) { 
+          console.log(product.line_price);
+          console.log(product.title);
+          console.log(product.key);
+          document.getElementById('cart__drawer_items').innerHTML += '<div class="cart-items-new d-flex"><img src="' + product.featured_image.url + '" alt="' + product.featured_image.alt + '"><div class="card-description"><a href="javascript:;" onclick="remove_cart_item(this)" data-index="Quantity_'+index+'" id="Quantity_'+index+'" data-id="' + product.key +'" class="cart-remove"><img src="https://cdn.shopify.com/s/files/1/0553/0075/1405/files/close.svg?v=1649675539" /></a><h3>' + product.title + '</h3><p>Size:<span>' + 's' + '</span></p><p>Color:<span>' + product.variant_title +'</span></p><div class="d-flex align-items-center cart-flex"><div class="count-number"><a href="javascript:;"  onclick="minus_qty_fun(this)" class="btn-small minus_qty" data-index="Quantity_'+index+'"><span>-</span></a>'+'<input type="number" name="updates[]" id="Quantity_'+index+'" class="qty-input" value="' + product.quantity +'" min="0" data-id="' + product.key +'"data-cart-item-input-quantity><a href="javascript:;" onclick="plus_qty_fun(this)" class="btn-small plus_qty" data-index="Quantity_'+index+'"><span>+</span></a></div><h5>' + Shopify.formatMoney(product.line_price) + '</h5></div></div></div> ';
+      	});
+    } else {
+      document.getElementById('cart__drawer_items').innerHTML = '<p>Cart is empty</p>';
+    }
+     document.getElementById('cart__total_price').innerHTML = Shopify.formatMoney(data.total_price);
+    document.getElementById('cart_item_count').innerHTML = (data.items.length + " Items");
+  });
+  
+ function minus_qty_fun(a) {
+   var data_index = $(a).attr('data-index');
+   var input = $(a).next();
+   var getVal = parseInt($(a).next().val());
+   var getkey =parseInt($(a).next().attr('data-id'));
+   var setVal = getVal - 1; 
+   if(setVal >= 1){
+     var count = parseInt($(this).next().val(setVal));
+   }
+   $.post('/cart/change.js', { 
+     quantity: setVal, 
+     id: getkey
+   }).done(function(response){
+     fetch('/cart.json')
+     .then((resp) => resp.json())
+     .then((data) => {
+       if(data.items.length > 0) {
+         console.log(data.items);
+         data.items.forEach(function(product, index) { 
+           console.log(product.title);
+           $('#cart__drawer_items').empty();
+           setTimeout(function(){
+             $( "#cart__drawer_items" ).append( '<div class="cart-items-new d-flex"><img src="' + product.featured_image.url + '" alt="' + product.featured_image.alt + '"><div class="card-description"><a href="javascript:;" onclick="remove_cart_item(this)" data-index="Quantity_'+index+'" id="Quantity_'+index+'" data-id="' + product.key +'" class="cart-remove"><img src="https://cdn.shopify.com/s/files/1/0553/0075/1405/files/close.svg?v=1649675539" /></a><h3>' + product.title + '</h3><p>Size:<span>' + 's' + '</span></p><p>Color:<span>' + product.variant_title +'</span></p><div class="d-flex align-items-center cart-flex"><div class="count-number"><a href="javascript:;" onclick="minus_qty_fun(this)" class="btn-small minus_qty" data-index="Quantity_'+index+'"><span>-</span></a>'+'<input type="number" name="updates[]" id="Quantity_'+index+'" class="qty-input" value="' + product.quantity +'" min="0" data-id="' + product.key +'"data-cart-item-input-quantity><a href="javascript:;" onclick="plus_qty_fun(this)" class="btn-small plus_qty" data-index="Quantity_'+index+'"><span>+</span></a></div><h5>' + Shopify.formatMoney(product.line_price) + '</h5></div></div></div>' );
+           },100);
+         });
+       } else {
+         document.getElementById('cart__drawer_items').innerHTML = '<p>Cart is empty</p>';
+       }
+       document.getElementById('cart__total_price').innerHTML = Shopify.formatMoney(data.total_price);
+       document.getElementById('cart_item_count').innerHTML = (data.items.length + " Items");
+     });
+   });
+ }
+  
+function plus_qty_fun(a) {
+  var data_index = $(a).attr('data-index');
+  var getVal =parseInt($(a).prev().val());
+  var getkey =parseInt($(a).prev().attr('data-id'));
+  var setVal = getVal + 1;
+  $(this).prev().val(setVal);
+  $.post('/cart/change.js', { 
+    quantity: setVal, 
+    id: getkey
+  }).done(function(response){
+//     $('#loader').show();
+//     $('#cart__drawer_items').css('opacity','0');
+    $('#cart__drawer_items').empty();
+    fetch('/cart.json')
+    .then((resp) => resp.json())
+    .then((data) => {
+      if(data.items.length > 0) {
+        console.log(data.items);
+        data.items.forEach(function(product, index) { 
+         
+          setTimeout(function(){
+            $( "#cart__drawer_items" ).append( '<div class="cart-items-new d-flex"><img src="' + product.featured_image.url + '" alt="' + product.featured_image.alt + '"><div class="card-description"><a href="javascript:;" onclick="remove_cart_item(this)" data-index="Quantity_'+index+'" id="Quantity_'+index+'" data-id="' + product.key +'" class="cart-remove"><img src="https://cdn.shopify.com/s/files/1/0553/0075/1405/files/close.svg?v=1649675539" /></a><h3>' + product.title + '</h3><p>Size:<span>' + 's' + '</span></p><p>Color:<span>' + product.variant_title +'</span></p><div class="d-flex align-items-center cart-flex"><div class="count-number"><a href="javascript:;" onclick="minus_qty_fun(this)" class="btn-small minus_qty" data-index="Quantity_'+index+'"><span>-</span></a>'+'<input type="number" name="updates[]" id="Quantity_'+index+'" class="qty-input" value="' + product.quantity +'" min="0" data-id="' + product.key +'"data-cart-item-input-quantity><a href="javascript:;" onclick="plus_qty_fun(this)" class="btn-small plus_qty" data-index="Quantity_'+index+'"><span>+</span></a></div><h5 class="price">' + Shopify.formatMoney(product.line_price) + '</h5></div></div></div>' );
+//             $('#cart__drawer_items').css('opacity','1');
+//             $('#loader').hide();
+          },0.5);
+        });
+      } else {
+        document.getElementById('cart__drawer_items').innerHTML = '<p>Cart is empty</p>';
+      }
+      document.getElementById('cart__total_price').innerHTML = Shopify.formatMoney(data.total_price);
+      document.getElementById('cart_item_count').innerHTML = (data.items.length + " Items");
+    });
+  });
+}
+
+ 
+  function remove_cart_item(a) {
+    var data_index = $(a).attr('data-index');
+    var key = $(a).attr('data-id');
+    console.log(data_index);
+    console.log(key);
+    $.post('/cart/change.js', { 
+      quantity: 0, 
+      id: key
+    }).done(function(response){
+      fetch('/cart.json')
+      .then((resp) => resp.json())
+      .then((data) => {
+        if(data.items.length > 0) {
+          console.log(data.items);
+          data.items.forEach(function(product, index) { 
+
+            console.log(product.line_price);
+            console.log(product.title);
+            console.log(product.key);
+            $('#cart__drawer_items').empty();
+            setTimeout(function(){
+              $( "#cart__drawer_items" ).append( '<div class="cart-items-new d-flex"><img src="' + product.featured_image.url + '" alt="' + product.featured_image.alt + '"><div class="card-description"><a href="javascript:;" onclick="remove_cart_item(this)" data-index="Quantity_'+index+'" id="Quantity_'+index+'" data-id="' + product.key +'" class="cart-remove"><img src="https://cdn.shopify.com/s/files/1/0553/0075/1405/files/close.svg?v=1649675539" /></a><h3>' + product.title + '</h3><p>Size:<span>' + 's' + '</span></p><p>Color:<span>' + product.variant_title +'</span></p><div class="d-flex align-items-center cart-flex"><div class="count-number"><a href="javascript:;" onclick="minus_qty_fun(this)" class="btn-small minus_qty" data-index="Quantity_'+index+'"><span>-</span></a>'+'<input type="number" name="updates[]" id="Quantity_'+index+'" class="qty-input" value="' + product.quantity +'" min="0" data-id="' + product.key +'"data-cart-item-input-quantity><a href="javascript:;" onclick="plus_qty_fun(this)" class="btn-small plus_qty" data-index="Quantity_'+index+'"><span>+</span></a></div><h5>' + Shopify.formatMoney(product.line_price) + '</h5></div></div></div>' );
+            },100);
+
+          });
+        } else {
+          document.getElementById('cart__drawer_items').innerHTML = '<p>Cart is empty</p>';
+        }
+        document.getElementById('cart__total_price').innerHTML = Shopify.formatMoney(data.total_price);
+        document.getElementById('cart_item_count').innerHTML = (data.items.length + " Items");
+      });
+    });
+  }
+  
+</script>
