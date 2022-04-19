@@ -97,10 +97,7 @@ fetch('/cart.json')
   .then((data) => {
     if(data.items.length > 0) {
         data.items.forEach(function(product, index) { 
-          console.log(product.line_price);
-          console.log(product.title);
-          console.log(product.key);
-          document.getElementById('cart__drawer_items').innerHTML += '<div class="cart-items-new d-flex"><img src="' + product.featured_image.url + '" alt="' + product.featured_image.alt + '"><div class="card-description"><a href="javascript:;" onclick="remove_cart_item(this)" data-index="Quantity_'+index+'" id="Quantity_'+index+'" data-id="' + product.key +'" class="cart-remove"><img src="https://cdn.shopify.com/s/files/1/0553/0075/1405/files/close.svg?v=1649675539" /></a><h3>' + product.title + '</h3><p>Size:<span>' + 's' + '</span></p><p>Color:<span>' + product.variant_title +'</span></p><div class="d-flex align-items-center cart-flex"><div class="count-number"><a href="javascript:;"  onclick="minus_qty_fun(this)" class="btn-small minus_qty" data-index="Quantity_'+index+'"><span>-</span></a>'+'<input type="number" name="updates[]" id="Quantity_'+index+'" class="qty-input" value="' + product.quantity +'" min="0" data-id="' + product.key +'"data-cart-item-input-quantity><a href="javascript:;" onclick="plus_qty_fun(this)" class="btn-small plus_qty" data-index="Quantity_'+index+'"><span>+</span></a></div><h5>' + Shopify.formatMoney(product.line_price) + '</h5></div></div></div> ';
+     		document.getElementById('cart__drawer_items').innerHTML += '<div class="cart-items-new d-flex removediv_'+index+'"><img src="' + product.featured_image.url + '" alt="' + product.featured_image.alt + '"><div class="card-description"><a href="javascript:;" onclick="remove_cart_item(this)" data-index="Quantity_'+index+'" id="Quantity_'+index+'" data-id="' + product.key +'" class="cart-remove"><img src="https://cdn.shopify.com/s/files/1/0553/0075/1405/files/close.svg?v=1649675539" /></a><h3>' + product.title + '</h3><p>Size:<span>' + 's' + '</span></p><p>Color:<span>' + product.variant_title +'</span></p><div class="d-flex align-items-center cart-flex"><div class="count-number"><a href="javascript:;"  onclick="minus_qty_fun(this)" class="btn-small minus_qty" data-index="Quantity_'+index+'"><span>-</span></a>'+'<input type="number" name="updates[]" id="Quantity_'+index+'" class="qty-input_'+index+'" value="' + product.quantity +'" min="0" data-id="' + product.key +'"data-cart-item-input-quantity><a href="javascript:;" onclick="plus_qty_fun(this)" class="btn-small plus_qty" data-index="Quantity_'+index+'"><span>+</span></a></div><h5 class="price_'+index+'">' + Shopify.formatMoney(product.line_price) + '</h5></div></div></div> ';
       	});
     } else {
       document.getElementById('cart__drawer_items').innerHTML = '<p>Cart is empty</p>';
@@ -129,10 +126,12 @@ fetch('/cart.json')
          console.log(data.items);
          data.items.forEach(function(product, index) { 
            console.log(product.title);
-           $('#cart__drawer_items').empty();
-           setTimeout(function(){
-             $( "#cart__drawer_items" ).append( '<div class="cart-items-new d-flex"><img src="' + product.featured_image.url + '" alt="' + product.featured_image.alt + '"><div class="card-description"><a href="javascript:;" onclick="remove_cart_item(this)" data-index="Quantity_'+index+'" id="Quantity_'+index+'" data-id="' + product.key +'" class="cart-remove"><img src="https://cdn.shopify.com/s/files/1/0553/0075/1405/files/close.svg?v=1649675539" /></a><h3>' + product.title + '</h3><p>Size:<span>' + 's' + '</span></p><p>Color:<span>' + product.variant_title +'</span></p><div class="d-flex align-items-center cart-flex"><div class="count-number"><a href="javascript:;" onclick="minus_qty_fun(this)" class="btn-small minus_qty" data-index="Quantity_'+index+'"><span>-</span></a>'+'<input type="number" name="updates[]" id="Quantity_'+index+'" class="qty-input" value="' + product.quantity +'" min="0" data-id="' + product.key +'"data-cart-item-input-quantity><a href="javascript:;" onclick="plus_qty_fun(this)" class="btn-small plus_qty" data-index="Quantity_'+index+'"><span>+</span></a></div><h5>' + Shopify.formatMoney(product.line_price) + '</h5></div></div></div>' );
-           },100);
+            $('.price_'+index).html('<h5 class="price_'+index+'">' + Shopify.formatMoney(product.line_price) + '</h5>');
+            $('.qty-input_'+index).val(product.quantity);
+//            $('#cart__drawer_items').empty();
+//            setTimeout(function(){
+//              $( "#cart__drawer_items" ).append( '<div class="cart-items-new d-flex"><img src="' + product.featured_image.url + '" alt="' + product.featured_image.alt + '"><div class="card-description"><a href="javascript:;" onclick="remove_cart_item(this)" data-index="Quantity_'+index+'" id="Quantity_'+index+'" data-id="' + product.key +'" class="cart-remove"><img src="https://cdn.shopify.com/s/files/1/0553/0075/1405/files/close.svg?v=1649675539" /></a><h3>' + product.title + '</h3><p>Size:<span>' + 's' + '</span></p><p>Color:<span>' + product.variant_title +'</span></p><div class="d-flex align-items-center cart-flex"><div class="count-number"><a href="javascript:;" onclick="minus_qty_fun(this)" class="btn-small minus_qty" data-index="Quantity_'+index+'"><span>-</span></a>'+'<input type="number" name="updates[]" id="Quantity_'+index+'" class="qty-input_" value="' + product.quantity +'" min="0" data-id="' + product.key +'"data-cart-item-input-quantity><a href="javascript:;" onclick="plus_qty_fun(this)" class="btn-small plus_qty" data-index="Quantity_'+index+'"><span>+</span></a></div><h5>' + Shopify.formatMoney(product.line_price) + '</h5></div></div></div>' );
+//            },100);
          });
        } else {
          document.getElementById('cart__drawer_items').innerHTML = '<p>Cart is empty</p>';
@@ -144,6 +143,7 @@ fetch('/cart.json')
  }
   
 function plus_qty_fun(a) {
+  
   var data_index = $(a).attr('data-index');
   var getVal =parseInt($(a).prev().val());
   var getkey =parseInt($(a).prev().attr('data-id'));
@@ -155,7 +155,7 @@ function plus_qty_fun(a) {
   }).done(function(response){
 //     $('#loader').show();
 //     $('#cart__drawer_items').css('opacity','0');
-    $('#cart__drawer_items').empty();
+   // $('#cart__drawer_items').empty();
     fetch('/cart.json')
     .then((resp) => resp.json())
     .then((data) => {
@@ -164,7 +164,10 @@ function plus_qty_fun(a) {
         data.items.forEach(function(product, index) { 
          
           setTimeout(function(){
-            $( "#cart__drawer_items" ).append( '<div class="cart-items-new d-flex"><img src="' + product.featured_image.url + '" alt="' + product.featured_image.alt + '"><div class="card-description"><a href="javascript:;" onclick="remove_cart_item(this)" data-index="Quantity_'+index+'" id="Quantity_'+index+'" data-id="' + product.key +'" class="cart-remove"><img src="https://cdn.shopify.com/s/files/1/0553/0075/1405/files/close.svg?v=1649675539" /></a><h3>' + product.title + '</h3><p>Size:<span>' + 's' + '</span></p><p>Color:<span>' + product.variant_title +'</span></p><div class="d-flex align-items-center cart-flex"><div class="count-number"><a href="javascript:;" onclick="minus_qty_fun(this)" class="btn-small minus_qty" data-index="Quantity_'+index+'"><span>-</span></a>'+'<input type="number" name="updates[]" id="Quantity_'+index+'" class="qty-input" value="' + product.quantity +'" min="0" data-id="' + product.key +'"data-cart-item-input-quantity><a href="javascript:;" onclick="plus_qty_fun(this)" class="btn-small plus_qty" data-index="Quantity_'+index+'"><span>+</span></a></div><h5 class="price">' + Shopify.formatMoney(product.line_price) + '</h5></div></div></div>' );
+            console.log(product.quantity);
+            $('.price_'+index).html('<h5 class="price_'+index+'">' + Shopify.formatMoney(product.line_price) + '</h5>');
+            $('.qty-input_'+index).val(product.quantity);
+           // $( "#cart__drawer_items" ).append( '<div class="cart-items-new d-flex"><img src="' + product.featured_image.url + '" alt="' + product.featured_image.alt + '"><div class="card-description"><a href="javascript:;" onclick="remove_cart_item(this)" data-index="Quantity_'+index+'" id="Quantity_'+index+'" data-id="' + product.key +'" class="cart-remove"><img src="https://cdn.shopify.com/s/files/1/0553/0075/1405/files/close.svg?v=1649675539" /></a><h3>' + product.title + '</h3><p>Size:<span>' + 's' + '</span></p><p>Color:<span>' + product.variant_title +'</span></p><div class="d-flex align-items-center cart-flex"><div class="count-number"><a href="javascript:;" onclick="minus_qty_fun(this)" class="btn-small minus_qty" data-index="Quantity_'+index+'"><span>-</span></a>'+'<input type="number" name="updates[]" id="Quantity_'+index+'" class="qty-input" value="' + product.quantity +'" min="0" data-id="' + product.key +'"data-cart-item-input-quantity><a href="javascript:;" onclick="plus_qty_fun(this)" class="btn-small plus_qty" data-index="Quantity_'+index+'"><span>+</span></a></div><h5 class="price_'+index+'">' + Shopify.formatMoney(product.line_price) + '</h5></div></div></div>' );
 //             $('#cart__drawer_items').css('opacity','1');
 //             $('#loader').hide();
           },0.5);
@@ -182,8 +185,6 @@ function plus_qty_fun(a) {
   function remove_cart_item(a) {
     var data_index = $(a).attr('data-index');
     var key = $(a).attr('data-id');
-    console.log(data_index);
-    console.log(key);
     $.post('/cart/change.js', { 
       quantity: 0, 
       id: key
@@ -192,16 +193,12 @@ function plus_qty_fun(a) {
       .then((resp) => resp.json())
       .then((data) => {
         if(data.items.length > 0) {
-          console.log(data.items);
-          data.items.forEach(function(product, index) { 
-
-            console.log(product.line_price);
-            console.log(product.title);
-            console.log(product.key);
-            $('#cart__drawer_items').empty();
-            setTimeout(function(){
-              $( "#cart__drawer_items" ).append( '<div class="cart-items-new d-flex"><img src="' + product.featured_image.url + '" alt="' + product.featured_image.alt + '"><div class="card-description"><a href="javascript:;" onclick="remove_cart_item(this)" data-index="Quantity_'+index+'" id="Quantity_'+index+'" data-id="' + product.key +'" class="cart-remove"><img src="https://cdn.shopify.com/s/files/1/0553/0075/1405/files/close.svg?v=1649675539" /></a><h3>' + product.title + '</h3><p>Size:<span>' + 's' + '</span></p><p>Color:<span>' + product.variant_title +'</span></p><div class="d-flex align-items-center cart-flex"><div class="count-number"><a href="javascript:;" onclick="minus_qty_fun(this)" class="btn-small minus_qty" data-index="Quantity_'+index+'"><span>-</span></a>'+'<input type="number" name="updates[]" id="Quantity_'+index+'" class="qty-input" value="' + product.quantity +'" min="0" data-id="' + product.key +'"data-cart-item-input-quantity><a href="javascript:;" onclick="plus_qty_fun(this)" class="btn-small plus_qty" data-index="Quantity_'+index+'"><span>+</span></a></div><h5>' + Shopify.formatMoney(product.line_price) + '</h5></div></div></div>' );
-            },100);
+           data.items.forEach(function(product, index) { 
+			
+            $('.removediv_'+index).remove();
+//             setTimeout(function(){
+//               $( "#cart__drawer_items" ).append( '<div class="cart-items-new d-flex"><img src="' + product.featured_image.url + '" alt="' + product.featured_image.alt + '"><div class="card-description"><a href="javascript:;" onclick="remove_cart_item(this)" data-index="Quantity_'+index+'" id="Quantity_'+index+'" data-id="' + product.key +'" class="cart-remove"><img src="https://cdn.shopify.com/s/files/1/0553/0075/1405/files/close.svg?v=1649675539" /></a><h3>' + product.title + '</h3><p>Size:<span>' + 's' + '</span></p><p>Color:<span>' + product.variant_title +'</span></p><div class="d-flex align-items-center cart-flex"><div class="count-number"><a href="javascript:;" onclick="minus_qty_fun(this)" class="btn-small minus_qty" data-index="Quantity_'+index+'"><span>-</span></a>'+'<input type="number" name="updates[]" id="Quantity_'+index+'" class="qty-input" value="' + product.quantity +'" min="0" data-id="' + product.key +'"data-cart-item-input-quantity><a href="javascript:;" onclick="plus_qty_fun(this)" class="btn-small plus_qty" data-index="Quantity_'+index+'"><span>+</span></a></div><h5>' + Shopify.formatMoney(product.line_price) + '</h5></div></div></div>' );
+//             },100);
 
           });
         } else {
